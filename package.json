@@ -1,0 +1,30 @@
+{
+  "name": "congrats-bot",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start:test": "node -r dotenv/config -r ts-node/register index.ts dotenv_config_path=.env.test",
+    "start:prod": "node -r dotenv/config -r ts-node/register index.ts dotenv_config_path=.env.prod"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@grammyjs/conversations": "^2.1.0",
+    "@types/node-cron": "^3.0.11",
+    "better-sqlite3": "^11.9.1",
+    "dotenv": "^16.5.0",
+    "grammy": "^1.36.1",
+    "node-cron": "^3.0.3",
+    "nodemon": "^3.1.10",
+    "ts": "^0.2.2",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.15.3",
+    "cross-env": "^7.0.3",
+    "typescript": "^5.8.3"
+  }
+}
