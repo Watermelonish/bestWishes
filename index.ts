@@ -12,11 +12,12 @@ import { addReminder, addReminderConversation } from "./src/commands/addRemider"
 import { quickGeneration, quickReminderConversation } from "./src/commands/quickReminder";
 import { showCalendar } from "./src/commands/getReminder";
 import { startBot } from "./src/commands/startBot";
+import { checkTodayReminders } from "./src/cron/checkTodayReminders";
 dotenv.config({
     path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env.prod'
   });
 // Инициализация бота и БД
-const bot = new Bot<MyContext>(process.env.BOT_API_KEY || '');
+export const bot = new Bot<MyContext>(process.env.BOT_API_KEY || '');
 export const reminderDB = new ReminderDB();
 
 // Обработка ошибок
@@ -37,7 +38,6 @@ bot.api.setMyCommands([
 bot.use(session({ initial: (): SessionData => ({}) }));
 bot.use(conversations());
 
-// Регистрация диалога
 bot.use(createConversation(addReminderConversation));
 bot.use(createConversation(quickReminderConversation));
 
@@ -58,29 +58,6 @@ bot.callbackQuery(/^holiday_\d+$/, async (ctx) => {
     await ctx.answerCallbackQuery();
 });
 // Ежедневная проверка напоминаний
-cron.schedule('0 10 * * *', async () => {
-    const today = new Date();
-    const month = today.getMonth() + 1;
-    const day = today.getDate();
-    console.log(month, day)
-    const reminders = reminderDB.getRemindersByDate(month, day);
-    console.log(reminders)
-    for (const reminder of reminders) {
-        try {
-            await bot.api.sendMessage(
-                reminder.chatid,
-                `Напоминание:\n${reminder.occasion} у ${reminder.congratName}\nВ течение пары минут придёт текст поздравления.`
-            );
-            // const  message = await generateCongratulation(reminder);
-            const message = 'С днём рождения!'
-            await bot.api.sendMessage(
-                reminder.chatid,
-                message
-            );
-        } catch (e) {
-            console.error(`Неудача:`, e);
-        }
-    }
-});
+cron.schedule('0 10 * * *', checkTodayReminders);
 // Запуск бота
 bot.start();

@@ -2,10 +2,8 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import { Reminder } from '../models/reminder';
 
-// Тип для объекта напоминания
 const DB_PATH = path.resolve(__dirname, process.env.DB_FILE);
 
-// Класс для работы с БД
 export class ReminderDB {
   private db: Database.Database;
 
@@ -13,14 +11,12 @@ export class ReminderDB {
     this.resetDatabase()
   }  
   async resetDatabase(): Promise<void> {    
-    // Создаем новое соединение
     this.db = new Database(DB_PATH);
     this.checkAndInitDB();
     process.on('exit', () => this.db.close());
 
   }
-    // Инициализация таблицы
-  // Проверяем существование таблицы перед инициализацией
+
   public checkAndInitDB() {
     const tableExists = this.db.prepare(`
       SELECT name FROM sqlite_master 
@@ -50,7 +46,6 @@ export class ReminderDB {
     }
   }
 
-  // Добавление напоминания
   addReminder(reminder: Reminder): Reminder {
     const stmt = this.db.prepare(`
       INSERT INTO reminder (chatid, occasion, month, day, congratName, info)
@@ -67,7 +62,6 @@ export class ReminderDB {
     return { id: info.lastInsertRowid as number, ...reminder };
   }
 
-  // Получение всех напоминаний для чата
   getRemindersByChatId(chatid: number): Reminder[] {
     console.log(chatid, this.db)
     return this.db.prepare(`
@@ -75,7 +69,6 @@ export class ReminderDB {
     `).all(chatid) as Reminder[];
   }
 
-  // Получение напоминаний на конкретную дату
   getRemindersByDate(month: number, day: number): Reminder[] {
     return this.db.prepare(`
       SELECT * FROM reminder WHERE month = ? AND day = ?
@@ -97,8 +90,7 @@ export class ReminderDB {
 
       return {
         ...reminder,
-        // Преобразование SQLite INTEGER в boolean если нужно
-        info: reminder.info || undefined // преобразуем null в undefined
+        info: reminder.info || undefined
       };
     } catch (error) {
       console.error('Ошибка при поиске напоминания:', error);
@@ -106,7 +98,6 @@ export class ReminderDB {
     }
   }
 
-  // Удаление напоминания
   deleteReminder(id: number): boolean {
     const changes = this.db.prepare(`
       DELETE FROM reminder WHERE id = ?
